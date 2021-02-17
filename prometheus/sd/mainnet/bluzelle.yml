@@ -1,0 +1,11 @@
+---
+ - labels:
+     environment: mainnet
+     role: sentry
+   targets:
+   - ip_here:26660
+ - labels:
+     environment: mainnet
+     role: validator
+   targets:
+   - ip_here:26660

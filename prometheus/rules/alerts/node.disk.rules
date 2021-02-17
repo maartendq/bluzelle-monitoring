@@ -1,0 +1,72 @@
+groups:
+  - name: Node Disk Alerts
+    rules:
+    - alert: NodeFilesystemReadonly
+      expr: node_filesystem_readonly{fstype!~"rootfs|nfs4"} > 0
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeFilesystemReadonly - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" is read only.'
+
+    - alert: NodeDiskFull4H
+      expr: predict_linear(node_filesystem_free_bytes{fstype!~"rootfs|nfs4|tmpfs"}[4h], 4 * 3600) < 0
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeDiskFull4H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of diskspace within 4 hours.'
+
+    - alert: NodeDiskFull1H
+      expr: predict_linear(node_filesystem_free_bytes{fstype!~"rootfs|nfs4|tmpfs"}[4h], 3600) < 0
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeDiskFull1H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of diskspace within 1 hour.'
+
+    - alert: NodeDiskFull
+      expr: node_filesystem_avail_bytes/node_filesystem_size_bytes < 0.01
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeDiskFull - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" out of diskspace (< 1% free).'
+
+    - alert: NodeInodeFull4H
+      expr: predict_linear(node_filesystem_files_free{fstype!~"rootfs|nfs4|tmpfs"}[4h], 4 * 3600) < 0
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeInodeFull4H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of inode numbers within 4 hours.'
+
+    - alert: NodeInodeFull1H
+      expr: predict_linear(node_filesystem_files_free{fstype!~"rootfs|nfs4|tmpfs"}[4h], 3600) < 0
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeInodeFull1H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of inode numbers within 1 hour.'
+
+    - alert: NodeInodeFull
+      expr: node_filesystem_files_free/node_filesystem_files < 0.01
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeInodeFull - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" out of inodes (< 1% free).'

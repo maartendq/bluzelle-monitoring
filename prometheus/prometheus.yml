@@ -1,0 +1,33 @@
+# my global config
+global:
+  scrape_interval:     30s
+  evaluation_interval: 30s
+
+alerting:
+  alertmanagers:
+    - file_sd_configs:
+      - files:
+        - sd/alertmanagers.yml
+        refresh_interval: 1m
+      timeout: 10s
+  alert_relabel_configs:
+    - regex: "prometheus_server"
+      action: labeldrop
+
+rule_files:
+  - rules/alerts/exporter*
+  - rules/alerts/bluzelle*
+  - rules/alerts/node.rules
+  - rules/alerts/node.disk.rules
+
+scrape_configs:
+   - job_name: mainnet
+     file_sd_configs:
+       - refresh_interval: 1m
+         files:
+           - 'sd/mainnet/*.yml'
+   - job_name: testnet 
+     file_sd_configs:
+       - refresh_interval: 1m
+         files:
+           - 'sd/testnet/*.yml'

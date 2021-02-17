@@ -1,0 +1,2 @@
+- targets:
+    - alertmanager:9093

@@ -1,0 +1,12 @@
+groups:
+  - name: Exporter Alerts
+    rules:
+    - alert: ExporterTargetDown
+      expr: up != 1
+      for: 5m
+      labels:
+        severity: critical
+        service: exporter
+      annotations:
+        summary: 'ExporterTargetDown - {{ $labels.instance }}'
+        description: 'Target "{{ $labels.instance }}" is down for more than 5 minutes.'

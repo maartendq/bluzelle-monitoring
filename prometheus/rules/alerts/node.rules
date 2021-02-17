@@ -1,0 +1,32 @@
+groups:
+  - name: Node General Alerts
+    rules:
+    - alert: NodeTimeOutOfSync
+      expr: node_timex_sync_status{} != 1
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeTimeOutOfSync - {{ $labels.instance_hostname }}'
+        description: 'Time on instance "{{ $labels.instance_hostname }}" not in sync with NTP.'
+
+    - alert: NodeTextfileCollectorDown
+      expr: time() - node_textfile_mtime_seconds{} > 3000
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeTextfileCollectorDown - {{ $labels.instance_hostname }} - {{ $labels.file }}'
+        description: 'Prometheus node-exporter textfile collector for file "{{ $labels.file }}" on instance "{{ $labels.instance_hostname }}" is down.'
+
+    - alert: NodeTextfileScrapingError
+      expr: node_textfile_scrape_error != 0
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeTextfileScrapingError - {{ $labels.instance_hostname }}'
+        description: 'Prometheus node-exporter textfile collector scraping error on instance "{{ $labels.instance_hostname }}".'
