@@ -1,0 +1,106 @@
+version: '2'
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  alerta_db: {}
+
+networks:
+  backend:
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    mem_limit: 200m
+    volumes:
+       - type: volume
+         source: prometheus_data
+         target: /prometheus
+       - type: bind
+         source: ./prometheus
+         target: /etc/prometheus
+         read_only: true
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9090:9090
+    networks:
+      - backend
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    mem_limit: 50m
+    user: "104"
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    environment:
+      # - GF_SECURITY_ADMIN_USER=admin
+      # - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - backend
+    restart: always
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    networks:
+      - backend
+    ports:
+        - 9093:9093
+    volumes:
+      - type: bind
+        source: ./alertmanager
+        target: /etc/alertmanager
+        read_only: true
+    command: [
+      '--config.file=/etc/alertmanager/alertmanager.yml',
+      '--log.level=debug',
+      '--web.external-url=http://myhostname.com/'
+    ]
+    hostname: 'alertmanager'
+   
+  alerta_db:
+    image: postgres:11
+    container_name: alerta_db
+    networks:
+     - backend
+    volumes:
+      - type: volume
+        source: alerta_db
+        target: /var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: monitoring
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    hostname: 'alerta_db'
+
+  alerta:
+    image: alerta/alerta-web:latest
+    container_name: alerta
+    networks:
+     - backend
+    ports:
+       - 8080:8080
+    depends_on:
+      - alerta_db
+    volumes:
+      - type: bind
+        source: ./alerta/alertad.conf
+        target: /app/alertad.conf
+        read_only: true
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@alerta_db:5432/monitoring
+      - PLUGINS=reject,blackout
+    hostname: 'alerta'
+

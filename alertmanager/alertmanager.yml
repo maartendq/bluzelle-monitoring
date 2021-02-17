@@ -1,0 +1,98 @@
+global:
+  # Mail configuration
+  smtp_require_tls: false
+  smtp_from: 'alertmanager@mystack'
+  smtp_smarthost: 'mymailprovider:25'
+  smtp_hello: 'alertmanager'
+
+# Notification template directory.
+templates: 
+- 'templates/*'
+
+# The root route on which each incoming alert enters.
+route:
+  # The labels by which incoming alerts are grouped together.
+  group_by: ['...']
+
+  # When a new group of alerts is created by an incoming alert, wait at
+  # least 'group_wait' to send the initial notification.
+  group_wait: 0s
+
+  # When the first notification was sent, wait 'group_interval' to send a batch
+  # of new alerts that started firing for that group.
+  group_interval: 5m
+
+  # If an alert has successfully been sent, wait 'repeat_interval' to
+  # resend them.
+  repeat_interval: 2h 
+
+  routes:
+    - receiver: bluzelle
+      match:
+        environment: mainnet
+      group_by: ['...']
+
+  # Default Receiver
+  receiver: default
+
+# Inhibition rules allow to mute a set of alerts given that another alert is
+# firing.
+inhibit_rules:
+- source_match:
+    severity: critical
+    alertname: 'DiskFull'
+  target_match_re:
+    alertname: '^DiskFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
+
+- source_match:
+    severity: critical
+  source_match_re:
+    alertname: '^DiskFull.*H'
+  target_match:
+    severity: major
+  target_match_re:
+    alertname: '^DiskFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
+
+- source_match:
+    severity: critical
+    alertname: 'InodeFull'
+  target_match_re:
+    alertname: '^InodeFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
+
+- source_match:
+    severity: critical
+  source_match_re:
+    alertname: '^InodeFull.*H'
+  target_match:
+    severity: major
+  target_match_re:
+    alertname: '^InodeFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
+
+receivers:
+- name: 'bluzelle'
+  email_configs:
+  - to: youremail@gmailzzz.com
+    html: '{{ template "mail.body" . }}'
+    headers:
+      Subject: '{{ template "mail.subject" . }}'
+    send_resolved: true
+
+  webhook_configs:
+  - url: 'http://alerta:8080/api/webhooks/prometheus'
+    send_resolved: true
+
+- name: 'default'
+  email_configs:
+  - to: youremail@gmailzzz.com
+    html: '{{ template "mail.body" . }}'
+    headers:
+      Subject: '{{ template "mail.subject" . }}'
+    send_resolved: true
+
+  webhook_configs:
+  - url: 'http://alerta:8080/api/webhooks/prometheus'
+    send_resolved: true

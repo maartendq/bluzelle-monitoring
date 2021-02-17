@@ -1,0 +1,21 @@
+groups:
+  - name: Bluzelle Alerts
+    rules:
+    - alert: BlockHeightDegraded 
+      expr: increase(tendermint_consensus_latest_block_height{job="mainnet"}[5m]) < 10
+      for: 5m
+      labels:
+        severity: major
+        service: bluzelle
+      annotations:
+        summary: 'BlockHeightDegraded - {{ $labels.instance_hostname }}'
+        description: 'Block height on "{{ $labels.instance_hostname }}" is increasing too slow'
+    - alert: TooFewPeers
+      expr: tendermint_p2p_peers{job="mainnet"} < 3
+      for: 5m
+      labels:
+        severity: major
+        service: bluzelle
+      annotations:
+        summary: 'TooFewPeers - {{ $labels.instance_hostname }}'
+        description: 'P2P Peers on "{{ $labels.instance_hostname }}" is lower than 3'

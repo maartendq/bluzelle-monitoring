@@ -1,0 +1,7 @@
+---
+ - labels:
+     environment: mainnet
+     role: node
+   targets:
+   - ip_here:9100
+   - ip_here:9100
