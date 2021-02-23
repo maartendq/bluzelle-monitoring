@@ -17,7 +17,7 @@ clone this repo
 open ports 3000 and 8080
 Edit the files prometheus/sd/mainnet and/or prometheus/sd/testnet. Define your hostnames/IPs in the yml files.
 Edit alertmanager/alertmanager.yml, define your smtp credentials and set the desired email_configs:
-Edit docker-compose.yml, Remove the # and set admin passwords for alert, line 44 and 45.
+Edit docker-compose.yml, Remove the # and set admin passwords for alerta, line 44 and 45.
 
 
 ## How to deploy
