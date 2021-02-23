@@ -17,6 +17,7 @@ clone this repo
 open ports 3000 and 8080
 Edit the files prometheus/sd/mainnet and/or prometheus/sd/testnet. Define your hostnames/IPs in the yml files.
 Edit alertmanager/alertmanager.yml, define your smtp credentials and set the desired email_configs:
+Edit docker-compose.yml, Remove the # and set admin passwords for alert, line 44 and 45.
 
 
 ## How to deploy
@@ -24,3 +25,7 @@ Run ./provision.sh (will autostart)
 Start your stack docker-compose start [SERVICE]
 Stop your stack docker-compose stop [SERVICE]
 Stop and purge your stack: docker-compose -f docker-compose.yml down --volumes (Run without --volumes if  you want to keep data
+
+## URLS
+http://host.ip.host.ip:3000 Grafana (password admin/admin)
+http://host.ip.host.ip:8080 alerta
